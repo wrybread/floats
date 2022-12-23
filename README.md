@@ -13,4 +13,4 @@ And note that Google Maps made me remove the API key from index.php, you can get
 
 https://developers.google.com/maps/documentation/javascript/get-api-key
 
-And replace the "KEY_REMOVED" text with your key. 
+And replace the "KEY_REMOVED" text in index.php with your key. 
