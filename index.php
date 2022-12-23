@@ -111,7 +111,8 @@ function initMap() {
 </script>
 
 
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCsUaVH1bABUSRhEb7AHTkeQIyuActfI3Q&libraries=geometry&callback=initMap"></script>
+	
+<script src="https://maps.googleapis.com/maps/api/js?key=KEY_REMOVED&libraries=geometry&callback=initMap"></script>
 <script src="js/animation.js"></script>
 
 
