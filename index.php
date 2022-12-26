@@ -1,11 +1,49 @@
 <?php
 
+ini_set('display_errors', 1);
+
+
 // get the session name from the query string, which loads which points file to use
 $session = $_GET['s'];
+
+if ($session=="random" or $session=="") {	
+	ini_set('memory_limit', '1024M'); // big file!
+	$local_data_file = "trails.json";
+	
+	if (time()-filemtime($local_data_file) < 24 * 3600) {
+		// reusing our locally stored trails file
+		$json_data=file_get_contents($local_data_file);
+	}
+	else {
+		// the data file is too old, lets redownload it
+		$json_data=file_get_contents("https://app.onewheel.com/wp-json/fm/v2/trails");
+		file_put_contents($local_data_file, $json_data);
+	}	
+	
+	$array = json_decode($json_data, true);
+	$random_ride = $array[rand(0, count($array) - 1)];
+	$session = $random_ride["id"];
+	
+	// trying to make it not serve the same ride again and again when loading a random ride on mobile
+	header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+	header("Cache-Control: post-check=0, pre-check=0", false);
+	header("Pragma: no-cache");
+
+	$random_ride="true"; // as string since going to print it into javascript.
+}
+else {
+	$random_ride="false"; // as string
+}
 
 
 $overview = "https://app.onewheel.com/wp-json/fm/v2/trails/1?trackId=" . $session;
 $points_fname = "https://app.onewheel.com/wp-json/fm/v2/trailscoordinates/" . $session;
+
+
+// not really used anymore
+$autopan = $_GET['p'];
+if ($autopan=="yes" || $autopan=="true") $autopan="true"; // this has to be a string since it gets printed into javascript. I'm sure there's a better way.
+else $autopan="false";
 
 
 ?>
@@ -40,7 +78,20 @@ html, body {
 
 
 
-
+#battery_soc{   
+	background-colorZZ: blue;
+	position: absolute; 
+	width: 99%;
+	top: 0;
+    left: 0;
+    right: 0;
+	text-align: center;
+	height:30px;
+	z-index: 2000; 
+	color: white;
+	
+}
+ 
 
 
 
@@ -85,6 +136,11 @@ html, body {
 
 <script>
 
+let autopan = <? print $autopan; ?>;
+let random_ride = <? print $random_ride; ?>;
+let session_number = <?php echo $session; ?>;
+
+console.log("Track ID = <?php echo $session; ?>");
 console.log("Using <?php echo $points_fname; ?>");
 
 // make the route global
@@ -111,11 +167,16 @@ function initMap() {
 </script>
 
 
-	
-<script src="https://maps.googleapis.com/maps/api/js?key=KEY_REMOVED&libraries=geometry&callback=initMap"></script>
-<script src="js/animation.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCsUaVH1bABUSRhEb7AHTkeQIyuActfI3Q&libraries=geometry&callback=initMap"></script>
+<script src="js/animation.js?v=<?php print rand(); ?>"></script>
 
+<div id="battery_soc"></div>
+<div id="some_form">
 
+  <input type="checkbox" name="filter" value="distributer" class='chk-btn' >
+  <label for='shower'>AutoPan</label>
+
+</div>
 
   </body>
 </html>
