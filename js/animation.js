@@ -1,11 +1,13 @@
 
-
+let pan_counter=0;
+let last_point;
 
 var RouteAnimation = function (path, map) {
 	var self = this;
 	var animationIndex = 0;
 	var pin = new google.maps.MarkerImage('images/pin.png', null, null, null, new google.maps.Size(26, 31));
-	fooey = new google.maps.MarkerImage('images/fooey.png', null, null, null, new google.maps.Size(26, 31));
+	//fooey = new google.maps.MarkerImage('images/fooey.png', null, null, null, new google.maps.Size(26, 31));
+	fooey = new google.maps.MarkerImage('images/pin.png', null, null, null, new google.maps.Size(26, 31));
 	trans = new google.maps.MarkerImage('images/transparent.png', null, null, null, new google.maps.Size(26, 31));
 	var paused = false;
 	var started = false;
@@ -63,6 +65,33 @@ var RouteAnimation = function (path, map) {
 		destination = path[nextOffset].googLatLng;
 		numSteps = google.maps.geometry.spherical.computeDistanceBetween(departure, destination) / moveSpeed;
 
+		let msg = path[nextOffset].battery_soc + "%";
+		if (random_ride) msg += " (" + session_number + ")";
+		$("#battery_soc").text(msg);
+		
+		last_point = path[nextOffset].googLatLng; //%%
+		
+		/*
+		// my first attempt at auto panning, which pans every X steps
+		pan_counter+=1;
+		if (autopan && pan_counter > 100) {
+			pan_counter=0;
+			map.panTo(path[nextOffset].googLatLng);
+		}
+		*/
+				
+		// much better auto pan system, only auto pan if we're outside the map object's viewport
+		var currentBounds = map.getBounds();
+
+		if(currentBounds.contains(path[nextOffset].googLatLng)){
+			// we're good!
+		}else{
+			// we're outside the viewport! Lets pan!
+			map.panTo(path[nextOffset].googLatLng);
+		}		
+		
+		//self.map.endMarker.hide();
+		//endMarker.setVisible(false);
 
 
 
@@ -116,6 +145,7 @@ var RouteAnimation = function (path, map) {
 	return {
 		play: function () {
 			if (finished) {
+
 				started = false;
 				lines.forEach(function (line) {
 					line.setMap(null);
@@ -128,6 +158,19 @@ var RouteAnimation = function (path, map) {
 				started = true;
 				finished = false;
 				animateRoute(path, map, function () {
+					// %% done! 
+					console.log("done!"); 
+
+					// put a little hong kong fooey at the end for good measure
+					fooey2 = new google.maps.MarkerImage('images/hongkong007.png', null, null, null, new google.maps.Size(110, 120));
+					endMarker2 = new google.maps.Marker({
+						position: last_point,
+						//icon: trans,
+						icon: fooey2,
+						map: self.map,
+					});
+					endMarker2.setMap(map);
+										
 					finished = true;
 					self.onCompleted && self.onCompleted()
 				});
