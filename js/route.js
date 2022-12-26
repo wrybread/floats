@@ -1,3 +1,5 @@
+
+
 var Route = (function () {
 	
 
@@ -66,6 +68,9 @@ var Route = (function () {
 			var playControl = new ButtonControl(controlDiv, 'Play', function () { self.playAnimation() });
 			var pauseControl = new ButtonControl(controlDiv, 'Pause', function () { self.pauseAnimation() });
 
+			//%%
+			//var batteryControl = new ButtonControl(controlDiv, 'ASDF', function () { self.pauseAnimation() });
+
 			controlDiv.index = 1;
 			self.map.controls[google.maps.ControlPosition.LEFT_CENTER].push(controlDiv);
 		},
@@ -76,6 +81,10 @@ var Route = (function () {
 				return {
 					lat: item.lat,
 					lng: item.lon,
+					battery_soc: item.battery_soc,
+					speed_ow: item.speed_ow,
+					speed2: item.speed,
+					altitude: item.alt,
 					//timestamp: item.seconds,
 					//ride: item.ride === 'true',
 					//speed: item.speed,
@@ -92,7 +101,8 @@ var Route = (function () {
 		setMarkers: function () {
 
 			var self = this,
-				startMarker, endMarker, pin;
+				//startMarker, endMarker, pin;
+				startMarker, pin;
 
 			pin = new google.maps.MarkerImage('images/pin.png', null, null, null, new google.maps.Size(26, 31));
 			fooey = new google.maps.MarkerImage('images/fooey.png', null, null, null, new google.maps.Size(70, 85));
@@ -104,23 +114,29 @@ var Route = (function () {
 			// start point
 			startMarker = new google.maps.Marker({
 				position: self.coordinates[0].googLatLng,
-				icon: fooey2,
+				//icon: fooey2,
+				icon: trans,
 				map: self.map,
 				animation: google.maps.Animation.DROP
 			});
 			
 
-			// end point
+			// end point (removed)
+			/*
 			endMarker = new google.maps.Marker({
 				position: self.coordinates[self.coordinates.length - 1].googLatLng,
-				icon: trans,
+				//icon: trans,
+				icon: fooey2,
 				map: self.map,
 			});
+			*/
 
 			var bounds = new google.maps.LatLngBounds();
 			for (var i = 0; i < self.coordinates.length; i++) {
 				bounds.extend(self.coordinates[i].googLatLng);
 			}
+			
+			
 
 			self.map.fitBounds(bounds);
 			self.map.setZoom(16); // set initial zoom level
@@ -159,3 +175,6 @@ var Route = (function () {
 	return Route;
 
 })();
+
+
+
